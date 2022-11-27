@@ -34,12 +34,21 @@ async function run() {
 
     try {
         const usersCollection = client.db('PlatinamSwapDB').collection('users');
-        // const reviewCollection = client.db('kaPhotography').collection('reviews');
+        const categoryCollection = client.db('PlatinamSwapDB').collection('productCategories');
         app.post('/jwt', (req, res) => {
             const user = req.body;
             const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '2h' });
             res.send({ token })
         })
+
+        app.get('/categories', async (req, res) => {
+            const quarry = {}
+            const cursor = categoryCollection.find(quarry);
+            const categories = await cursor.toArray();
+            res.send(categories);
+        })
+
+
         app.post('/users', async (req, res) => {
             const user = req.body;
             const result = await usersCollection.insertOne(user);
@@ -61,5 +70,5 @@ app.get('/', (req, res) => {
 
 app.listen(port, () => {
     console.log(`platinam-swap server running on ${port}`);
-})
+});
 
