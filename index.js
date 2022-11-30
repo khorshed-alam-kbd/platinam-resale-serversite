@@ -59,7 +59,6 @@ async function run() {
             const cursor = usersCollection.find(quarry);
             const users = await cursor.toArray();
             res.send(users);
-
         })
 
         app.post('/users', async (req, res) => {
@@ -73,6 +72,38 @@ async function run() {
             const quarry = { _id: ObjectId(id) };
             const users = await usersCollection.deleteOne(quarry);
             res.send(users);
+        })
+
+        // seller api
+        app.get('/sellers', async (req, res) => {
+            let quarry = {}
+            if (req.query.userRole) {
+                quarry = {
+                    userRole: req.query.userRole
+                }
+            }
+            const cursor = usersCollection.find(quarry);
+            const sellers = await cursor.toArray();
+            res.send(sellers);
+        })
+        app.delete('/sellers/:id', async (req, res) => {
+            const id = req.params.id;
+            const quarry = { _id: ObjectId(id) };
+            const sellers = await usersCollection.deleteOne(quarry);
+            res.send(sellers);
+        })
+        app.patch('/sellers/:id', async (req, res) => {
+            const id = req.params.id;
+            const userStatus = req.body;
+            const quarry = { _id: ObjectId(id) };
+
+            const updateDoc = {
+                $set: {
+                    userStatus: userStatus
+                }
+            }
+            const result = await usersCollection.updateOne(quarry, updateDoc);
+            res.send(result);
         })
 
 
