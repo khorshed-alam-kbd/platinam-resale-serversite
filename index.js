@@ -48,12 +48,34 @@ async function run() {
             res.send(categories);
         })
 
+        // user api 
+        app.get('/users', async (req, res) => {
+            let quarry = {}
+            if (req.query.userRole) {
+                quarry = {
+                    userRole: req.query.userRole
+                }
+            }
+            const cursor = usersCollection.find(quarry);
+            const users = await cursor.toArray();
+            res.send(users);
+
+        })
 
         app.post('/users', async (req, res) => {
             const user = req.body;
             const result = await usersCollection.insertOne(user);
             res.send(result);
         })
+
+        app.delete('/users/:id', async (req, res) => {
+            const id = req.params.id;
+            const quarry = { _id: ObjectId(id) };
+            const users = await usersCollection.deleteOne(quarry);
+            res.send(users);
+        })
+
+
 
     }
     finally {
