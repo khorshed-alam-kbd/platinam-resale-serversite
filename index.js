@@ -34,18 +34,57 @@ async function run() {
 
     try {
         const usersCollection = client.db('PlatinamSwapDB').collection('users');
-        const categoryCollection = client.db('PlatinamSwapDB').collection('productCategories');
+        const categoriesCollection = client.db('PlatinamSwapDB').collection('productCategories');
+        const productsCollection = client.db('PlatinamSwapDB').collection('products');
         app.post('/jwt', (req, res) => {
             const user = req.body;
             const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '2h' });
             res.send({ token })
         })
 
+
+        // categories api
         app.get('/categories', async (req, res) => {
             const quarry = {}
-            const cursor = categoryCollection.find(quarry);
+            const cursor = categoriesCollection.find(quarry);
             const categories = await cursor.toArray();
             res.send(categories);
+        })
+        app.get('/categories/:id', async (req, res) => {
+            const id = req.params.id;
+            const quarry = { _id: ObjectId(id) };
+            const category = await categoriesCollection.findOne(quarry);
+            res.send(category);
+        })
+
+        // product api
+        app.get('/products', async (req, res) => {
+            let quarry = {}
+            if (req.query.email) {
+                quarry = {
+                    sellerEmail: req.query.email
+                }
+            }
+            if (req.query.category) {
+                quarry = {
+                    category: req.query.category
+                }
+            }
+            const cursor = productsCollection.find(quarry);
+            const products = await cursor.toArray();
+            res.send(products);
+        })
+        app.post('/products', async (req, res) => {
+            const product = req.body;
+            const products = await productsCollection.insertOne(product);
+            res.send(products);
+        })
+
+        app.delete('/products/:id', async (req, res) => {
+            const id = req.params.id;
+            const quarry = { _id: ObjectId(id) };
+            const products = await productsCollection.deleteOne(quarry);
+            res.send(products);
         })
 
         // user api 
@@ -105,6 +144,7 @@ async function run() {
             const result = await usersCollection.updateOne(quarry, updateDoc);
             res.send(result);
         })
+
 
 
 
