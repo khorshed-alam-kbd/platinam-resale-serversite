@@ -38,7 +38,7 @@ async function run() {
         const productsCollection = client.db('PlatinamSwapDB').collection('products');
         app.post('/jwt', (req, res) => {
             const user = req.body;
-            const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '2h' });
+            const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '10h' });
             res.send({ token })
         })
 
@@ -80,6 +80,30 @@ async function run() {
             res.send(products);
         })
 
+        app.put('/products/:id', async (req, res) => {
+            const id = req.params.id;
+
+            const buyerName = req.body.buyerName
+            const buyerEmail = req.body.buyerEmail
+            const buyerPhoneNumber = req.body.buyerPhoneNumber
+            const meetingLocation = req.body.meetingLocation
+            const productStatus = req.body.productStatus
+
+            const quarry = { _id: ObjectId(id) };
+            const options = { upsert: true };
+            const updateDoc = {
+                $set: {
+                    buyerName: buyerName,
+                    buyerEmail: buyerEmail,
+                    buyerPhoneNumber: buyerPhoneNumber,
+                    meetingLocation: meetingLocation,
+                    productStatus: productStatus
+                }
+            }
+            const product = await productsCollection.updateOne(quarry, updateDoc, options);
+            res.send(product);
+        })
+
         app.delete('/products/:id', async (req, res) => {
             const id = req.params.id;
             const quarry = { _id: ObjectId(id) };
@@ -98,6 +122,12 @@ async function run() {
             const cursor = usersCollection.find(quarry);
             const users = await cursor.toArray();
             res.send(users);
+        })
+        app.get('/users/:email', async (req, res) => {
+            const email = req.params.email;
+            const quarry = { email };
+            const result = await usersCollection.findOne(quarry);
+            res.send(result);
         })
 
         app.post('/users', async (req, res) => {
@@ -133,7 +163,7 @@ async function run() {
         })
         app.patch('/sellers/:id', async (req, res) => {
             const id = req.params.id;
-            const userStatus = req.body;
+            const userStatus = req.body.userStatus;
             const quarry = { _id: ObjectId(id) };
 
             const updateDoc = {
