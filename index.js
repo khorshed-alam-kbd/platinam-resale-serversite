@@ -215,6 +215,14 @@ async function run() {
             const user = await usersCollection.findOne(query);
             res.send({ isAdmin: user?.userRole === "admin" });
         })
+        app.get('/users/verify/:email', async (req, res) => {
+            const email = req.params.email;
+            const query = { email }
+            const user = await usersCollection.findOne(query);
+            res.send({
+                isVerify: user?.userStatus === true
+            });
+        })
 
         app.post('/users', async (req, res) => {
             const user = req.body;
