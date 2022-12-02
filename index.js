@@ -142,6 +142,19 @@ async function run() {
             const product = await productsCollection.updateOne(quarry, updateDoc, options);
             res.send(product);
         })
+        app.put('/products/advertisement/:id', async (req, res) => {
+            const id = req.params.id;
+            const advertisementStatus = req.body.advertisementStatus
+            const quarry = { _id: ObjectId(id) };
+            const options = { upsert: true };
+            const updateDoc = {
+                $set: {
+                    advertisementStatus: advertisementStatus
+                }
+            }
+            const product = await productsCollection.updateOne(quarry, updateDoc, options);
+            res.send(product);
+        })
 
         app.delete('/products/:id', async (req, res) => {
             const id = req.params.id;
