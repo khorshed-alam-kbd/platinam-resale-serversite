@@ -60,14 +60,36 @@ async function run() {
         // product api
         app.get('/products', async (req, res) => {
             let quarry = {}
+            if (req.query.category) {
+                quarry = {
+                    category: req.query.category
+                }
+            }
+            if (req.query.reportStatus) {
+                quarry = {
+                    reportStatus: req.query.reportStatus
+                }
+            }
+            const cursor = productsCollection.find(quarry);
+            const products = await cursor.toArray();
+            res.send(products);
+        })
+        app.get('/products/seller', async (req, res) => {
+            let quarry = {}
             if (req.query.email) {
                 quarry = {
                     sellerEmail: req.query.email
                 }
             }
-            if (req.query.category) {
+            const cursor = productsCollection.find(quarry);
+            const products = await cursor.toArray();
+            res.send(products);
+        })
+        app.get('/products/buyer', async (req, res) => {
+            let quarry = {}
+            if (req.query.email) {
                 quarry = {
-                    category: req.query.category
+                    buyerEmail: req.query.email
                 }
             }
             const cursor = productsCollection.find(quarry);
@@ -104,12 +126,36 @@ async function run() {
             res.send(product);
         })
 
+        app.put('/products/report/:id', async (req, res) => {
+            const id = req.params.id;
+            const reportedBy = req.body.reportedBy
+            const reportStatus = req.body.reportStatus
+
+            const quarry = { _id: ObjectId(id) };
+            const options = { upsert: true };
+            const updateDoc = {
+                $set: {
+                    reportedBy: reportedBy,
+                    reportStatus: reportStatus
+                }
+            }
+            const product = await productsCollection.updateOne(quarry, updateDoc, options);
+            res.send(product);
+        })
+
         app.delete('/products/:id', async (req, res) => {
             const id = req.params.id;
             const quarry = { _id: ObjectId(id) };
             const products = await productsCollection.deleteOne(quarry);
             res.send(products);
         })
+        app.delete('/products/report/:id', async (req, res) => {
+            const id = req.params.id;
+            const quarry = { _id: ObjectId(id) };
+            const products = await productsCollection.deleteOne(quarry);
+            res.send(products);
+        })
+
 
         // user api 
         app.get('/users', async (req, res) => {
