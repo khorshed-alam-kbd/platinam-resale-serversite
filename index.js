@@ -85,6 +85,15 @@ async function run() {
             const products = await cursor.toArray();
             res.send(products);
         })
+        app.get('/products/advertised', async (req, res) => {
+
+            const quarry = {
+                advertisementStatus: true, productStatus: "available"
+            }
+            const cursor = productsCollection.find(quarry);
+            const products = await cursor.toArray();
+            res.send(products);
+        })
         app.get('/products/buyer', async (req, res) => {
             let quarry = {}
             if (req.query.email) {
@@ -169,7 +178,6 @@ async function run() {
             res.send(products);
         })
 
-
         // user api 
         app.get('/users', async (req, res) => {
             let quarry = {}
@@ -187,6 +195,25 @@ async function run() {
             const quarry = { email };
             const result = await usersCollection.findOne(quarry);
             res.send(result);
+        })
+
+        app.get('/users/buyer/:email', async (req, res) => {
+            const email = req.params.email;
+            const query = { email }
+            const user = await usersCollection.findOne(query);
+            res.send({ isBuyer: user?.userRole === "buyer" });
+        })
+        app.get('/users/seller/:email', async (req, res) => {
+            const email = req.params.email;
+            const query = { email }
+            const user = await usersCollection.findOne(query);
+            res.send({ isSeller: user?.userRole === "seller" });
+        })
+        app.get('/users/admin/:email', async (req, res) => {
+            const email = req.params.email;
+            const query = { email }
+            const user = await usersCollection.findOne(query);
+            res.send({ isAdmin: user?.userRole === "admin" });
         })
 
         app.post('/users', async (req, res) => {
@@ -233,10 +260,6 @@ async function run() {
             const result = await usersCollection.updateOne(quarry, updateDoc);
             res.send(result);
         })
-
-
-
-
     }
     finally {
 
